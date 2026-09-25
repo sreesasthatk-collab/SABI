@@ -1,11 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SABI - AI Homework Helper</title>
-
-  <style>
+  <title>SABI - AI Homework Helper</title>  <style>
     * {
       box-sizing: border-box;
       margin: 0;
@@ -81,8 +78,8 @@
       box-shadow: 0 5px 20px rgba(0,0,0,0.06);
     }
 
-    .subject:hover {
-      transform: translateY(-2px);
+    .subject:active {
+      transform: scale(0.98);
     }
 
     .chat-box {
@@ -185,81 +182,75 @@
         width: 100%;
       }
     }
-  </style>
-</head>
+  </style></head><body>  <div class="container"><header>
+  <div class="logo">SABI</div>
+  <div class="badge">AI Homework Helper</div>
+</header>
 
-<body>
+<section class="hero">
+  <h1>Welcome to SABI 👋</h1>
 
-  <div class="container">
+  <p>
+    Ask questions, understand your homework,<br>
+    and learn step by step with SABI.
+  </p>
+</section>
 
-    <header>
-      <div class="logo">SABI</div>
-      <div class="badge">AI Homework Helper</div>
-    </header>
+<div class="subjects">
+  <button class="subject" type="button" data-subject="Math">📐 Math</button>
+  <button class="subject" type="button" data-subject="Science">🔬 Science</button>
+  <button class="subject" type="button" data-subject="English">📚 English</button>
+  <button class="subject" type="button" data-subject="History">🌍 History</button>
+</div>
 
-    <section class="hero">
-      <h1>Welcome to SABI 👋</h1>
-      <p>
-        Ask questions, understand your homework,<br>
-        and learn step by step with SABI.
-      </p>
-    </section>
+<div class="chat-box">
 
-    <div class="subjects">
-      <button class="subject" onclick="setSubject('Math')">📐 Math</button>
-      <button class="subject" onclick="setSubject('Science')">🔬 Science</button>
-      <button class="subject" onclick="setSubject('English')">📚 English</button>
-      <button class="subject" onclick="setSubject('History')">🌍 History</button>
-    </div>
+  <div id="answer">
+    👋 Hi! I'm SABI. Ask me a homework question and I'll help you.
+  </div>
 
-    <div class="chat-box">
+  <div class="input-area">
 
-      <div id="answer">
-        👋 Hi! I'm SABI. Ask me a homework question and I'll help you.
-      </div>
+    <input
+      id="question"
+      type="text"
+      placeholder="Ask SABI anything..."
+      autocomplete="off"
+    >
 
-      <div class="input-area">
-
-        <input
-          id="question"
-          type="text"
-          placeholder="Ask SABI anything..."
-          autocomplete="off"
-        >
-
-        <button
-          class="send-btn"
-          id="sendBtn"
-          type="button"
-        >
-          Send
-        </button>
-
-      </div>
-
-      <label class="upload-label" for="fileInput">
-        📷 Upload Homework Photo
-      </label>
-
-      <input
-        id="fileInput"
-        type="file"
-        accept="image/*"
-      >
-
-      <div id="fileName"></div>
-
-    </div>
-
-    <footer>
-      SABI • Learn smarter, one question at a time.
-    </footer>
+    <button
+      class="send-btn"
+      id="sendBtn"
+      type="button"
+    >
+      Send
+    </button>
 
   </div>
 
-  <script>
+  <label class="upload-label" for="fileInput">
+    📷 Upload Homework Photo
+  </label>
+
+  <input
+    id="fileInput"
+    type="file"
+    accept="image/*"
+  >
+
+  <div id="fileName"></div>
+
+</div>
+
+<footer>
+  SABI • Learn smarter, one question at a time.
+</footer>
+
+  </div>  <script>
+    "use strict";
 
     let selectedSubject = "";
+    let isAsking = false;
 
     const questionBox = document.getElementById("question");
     const answerBox = document.getElementById("answer");
@@ -267,48 +258,63 @@
     const fileInput = document.getElementById("fileInput");
     const fileName = document.getElementById("fileName");
 
-    function setSubject(subject) {
+    // Subject buttons
+    document.querySelectorAll(".subject").forEach(function(button) {
+      button.addEventListener("click", function() {
 
-      selectedSubject = subject;
+        selectedSubject = button.dataset.subject;
 
-      questionBox.value = "";
+        questionBox.value = "";
 
-      questionBox.placeholder =
-        "Ask your " + subject + " question...";
+        questionBox.placeholder =
+          "Ask your " + selectedSubject + " question...";
 
-      questionBox.focus();
-    }
+        questionBox.focus();
+      });
+    });
 
-    fileInput.addEventListener("change", function () {
+    // Homework photo selection
+    fileInput.addEventListener("change", function() {
 
-      if (fileInput.files.length > 0) {
-
+      if (fileInput.files && fileInput.files.length > 0) {
         fileName.textContent =
           "📎 Selected: " + fileInput.files[0].name;
-
       } else {
-
         fileName.textContent = "";
-
       }
 
     });
 
+    // Enter key
     questionBox.addEventListener("keydown", function(event) {
 
       if (event.key === "Enter") {
 
         event.preventDefault();
 
-        askSabi();
+        if (!isAsking) {
+          askSabi();
+        }
 
       }
 
     });
 
-    sendBtn.addEventListener("click", askSabi);
+    // Send button
+    sendBtn.addEventListener("click", function() {
+
+      if (!isAsking) {
+        askSabi();
+      }
+
+    });
 
     async function askSabi() {
+
+      // Extra protection against duplicate requests
+      if (isAsking) {
+        return;
+      }
 
       const question = questionBox.value.trim();
 
@@ -318,48 +324,42 @@
           "Please type a question first.";
 
         return;
-
       }
 
-      // Clear the previous answer completely.
-      answerBox.textContent =
-        "🤔 SABI is thinking...";
+      isAsking = true;
 
       sendBtn.disabled = true;
       sendBtn.textContent = "Thinking...";
 
+      // Completely replace old answer
+      answerBox.textContent =
+        "🤔 SABI is thinking...";
+
+      const finalQuestion = selectedSubject
+        ? "Subject: " + selectedSubject + "\n\n" + question
+        : question;
+
       try {
 
-        const finalQuestion = selectedSubject
-          ? "Subject: " + selectedSubject + "\n\n" + question
-          : question;
-
         const response = await fetch("/api/ask", {
-
           method: "POST",
-
           headers: {
             "Content-Type": "application/json"
           },
-
           body: JSON.stringify({
             question: finalQuestion
           })
-
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-
           throw new Error(
             data.error || "Request failed"
           );
-
         }
 
-        // Replace the previous answer.
-        // Never append to the old answer.
+        // Show ONLY the latest answer.
         answerBox.textContent =
           data.answer ||
           "Sorry, I couldn't generate an answer.";
@@ -371,14 +371,13 @@
 
       } finally {
 
+        isAsking = false;
         sendBtn.disabled = false;
         sendBtn.textContent = "Send";
 
       }
-
     }
-
-  </script>
-
-</body>
+  </script></body>
 </html>
+```ഇത് paste ചെയ്ത് "Commit changes" ചെയ്യൂ.
+Cloudflare പുതിയ deployment വിജയിച്ച ശേഷം മാത്രം SABI തുറന്ന് test ചെയ്യാം. ആദ്യം 7+5 മാത്രം test ചെയ്യാം.
