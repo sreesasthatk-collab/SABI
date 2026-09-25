@@ -1,498 +1,348 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">  <title>SABI - AI Homework Helper</title>  <style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SABI - AI Homework Helper</title>
+
+  <style>
     * {
       box-sizing: border-box;
-    }
-
-    :root {
-      --bg: #f7f8fc;
-      --card: rgba(255,255,255,0.88);
-      --text: #171827;
-      --muted: #777b8c;
-      --border: #e9eaf1;
-      --primary: #6c5ce7;
-      --primary2: #8b5cf6;
-      --dark: #181828;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      margin: 0;
-      font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
-      background:
-        radial-gradient(circle at top left, #eee9ff 0, transparent 32%),
-        radial-gradient(circle at top right, #e8f1ff 0, transparent 28%),
-        var(--bg);
-      color: var(--text);
-    }
-
-    .app {
-      width: 100%;
-      max-width: 760px;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #eef2ff, #f8fafc);
       min-height: 100vh;
-      margin: auto;
-      display: flex;
-      flex-direction: column;
+      color: #172033;
     }
 
-    /* HEADER */
+    .container {
+      width: 92%;
+      max-width: 900px;
+      margin: auto;
+      padding: 25px 0 40px;
+    }
 
     header {
-      padding: 18px 18px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      backdrop-filter: blur(18px);
-      background: rgba(247,248,252,0.78);
-      border-bottom: 1px solid rgba(220,220,230,0.55);
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 11px;
+      margin-bottom: 35px;
     }
 
     .logo {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 22px;
-      color: white;
-      background: linear-gradient(135deg, var(--primary), var(--primary2));
-      box-shadow: 0 8px 22px rgba(108,92,231,0.28);
+      font-size: 30px;
+      font-weight: 800;
+      color: #4f46e5;
     }
 
-    .brand h1 {
-      margin: 0;
-      font-size: 21px;
-      letter-spacing: -0.5px;
-    }
-
-    .brand span {
-      display: block;
-      margin-top: 2px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .pro-badge {
-      padding: 7px 11px;
+    .badge {
+      background: white;
+      padding: 8px 14px;
       border-radius: 20px;
-      font-size: 11px;
-      font-weight: 700;
-      color: #5c48d7;
-      background: #eeeaff;
-    }
-
-    /* CHAT */
-
-    .chat {
-      flex: 1;
-      padding: 30px 18px 145px;
+      font-size: 13px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.06);
     }
 
     .hero {
       text-align: center;
-      padding: 32px 12px 25px;
+      margin-bottom: 35px;
     }
 
-    .hero-icon {
-      width: 72px;
-      height: 72px;
-      margin: 0 auto 18px;
-      border-radius: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 35px;
-      background: white;
-      box-shadow: 0 14px 40px rgba(40,35,80,0.10);
-    }
-
-    .hero h2 {
-      margin: 0;
-      font-size: 29px;
-      letter-spacing: -1px;
+    .hero h1 {
+      font-size: 38px;
+      margin-bottom: 12px;
     }
 
     .hero p {
-      margin: 9px auto 0;
-      max-width: 450px;
-      line-height: 1.55;
-      color: var(--muted);
-      font-size: 14px;
-    }
-
-    /* QUICK SUBJECTS */
-
-    .section-title {
-      margin: 12px 2px 12px;
-      font-size: 12px;
-      font-weight: 700;
-      color: #8b8e9c;
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
+      color: #64748b;
+      font-size: 16px;
+      line-height: 1.6;
     }
 
     .subjects {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 9px;
+      gap: 12px;
+      margin-bottom: 25px;
     }
 
     .subject {
-      border: 1px solid var(--border);
-      background: var(--card);
+      border: none;
+      background: white;
+      padding: 17px 10px;
       border-radius: 16px;
-      padding: 14px 5px;
-      text-align: center;
+      font-size: 15px;
+      font-weight: 600;
       cursor: pointer;
-      transition: 0.2s ease;
-      font-size: 12px;
-      color: #3e4050;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.06);
+      transition: 0.2s;
     }
 
     .subject:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(30,30,70,0.08);
     }
 
-    .subject-icon {
-      display: block;
-      font-size: 21px;
-      margin-bottom: 6px;
+    .chat-box {
+      background: white;
+      border-radius: 24px;
+      padding: 22px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.08);
     }
-
-    /* ANSWER */
 
     #answer {
-      margin-top: 22px;
+      min-height: 120px;
       padding: 18px;
-      background: white;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      line-height: 1.65;
-      box-shadow: 0 10px 30px rgba(30,30,70,0.06);
-      display: none;
-    }
-
-    .answer-title {
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 8px;
-    }
-
-    /* INPUT */
-
-    .input-wrapper {
-      position: fixed;
-      left: 50%;
-      bottom: 14px;
-      transform: translateX(-50%);
-      width: min(724px, calc(100% - 24px));
-      z-index: 20;
+      background: #f8fafc;
+      border-radius: 16px;
+      margin-bottom: 18px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      color: #334155;
     }
 
     .input-area {
-      padding: 11px;
-      border: 1px solid rgba(220,220,230,0.9);
-      border-radius: 23px;
-      background: rgba(255,255,255,0.91);
-      backdrop-filter: blur(22px);
-      box-shadow: 0 16px 45px rgba(30,30,60,0.13);
-    }
-
-    .textarea-wrap {
-      position: relative;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 54px;
-      max-height: 130px;
-      padding: 15px 14px;
-      padding-right: 50px;
-      border: none;
-      outline: none;
-      resize: none;
-      background: transparent;
-      font-family: inherit;
-      font-size: 15px;
-      color: var(--text);
-    }
-
-    textarea::placeholder {
-      color: #a0a3b0;
-    }
-
-    .bottom-row {
       display: flex;
+      gap: 10px;
       align-items: center;
-      justify-content: space-between;
-      gap: 8px;
     }
 
-    .tools {
-      display: flex;
-      gap: 7px;
+    #question {
+      flex: 1;
+      border: 1px solid #dbe2ea;
+      border-radius: 15px;
+      padding: 15px;
+      font-size: 15px;
+      outline: none;
     }
 
-    .tool-btn {
-      width: 40px;
-      height: 40px;
-      padding: 0;
-      border: 1px solid var(--border);
-      border-radius: 13px;
-      background: #fafaff;
-      cursor: pointer;
-      font-size: 17px;
+    #question:focus {
+      border-color: #6366f1;
     }
 
     .send-btn {
-      width: 45px;
-      height: 45px;
-      padding: 0;
       border: none;
-      border-radius: 15px;
-      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      background: #4f46e5;
       color: white;
-      font-size: 19px;
+      padding: 15px 20px;
+      border-radius: 15px;
+      font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 7px 18px rgba(108,92,231,0.27);
     }
 
-    input[type="file"] {
+    .send-btn:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .upload-label {
+      display: inline-block;
+      margin-top: 15px;
+      padding: 12px 16px;
+      background: #eef2ff;
+      color: #4338ca;
+      border-radius: 13px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    #fileInput {
       display: none;
     }
 
-    .file-name {
-      margin-top: 5px;
-      padding-left: 6px;
-      font-size: 11px;
-      color: var(--primary);
-      display: none;
+    #fileName {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #64748b;
     }
 
-    .hint {
+    footer {
       text-align: center;
-      margin-top: 7px;
-      color: #a1a3af;
-      font-size: 10px;
+      margin-top: 30px;
+      color: #94a3b8;
+      font-size: 13px;
     }
 
-    /* MOBILE */
-
-    @media (max-width: 500px) {
-
-      header {
-        padding: 15px 14px 12px;
-      }
-
-      .chat {
-        padding: 22px 14px 150px;
-      }
-
-      .hero {
-        padding-top: 25px;
-      }
-
-      .hero h2 {
-        font-size: 25px;
+    @media (max-width: 600px) {
+      .hero h1 {
+        font-size: 30px;
       }
 
       .subjects {
         grid-template-columns: repeat(2, 1fr);
       }
 
-      .input-wrapper {
-        width: calc(100% - 16px);
-        bottom: 8px;
+      .input-area {
+        flex-direction: column;
       }
 
-      .pro-badge {
-        display: none;
+      #question,
+      .send-btn {
+        width: 100%;
       }
     }
-  </style></head><body><div class="app">  <header>
-    <div class="brand">
-      <div class="logo">✦</div>
-      <div>
-        <h1>SABI</h1>
-        <span>AI Homework Helper</span>
+  </style>
+</head>
+
+<body>
+
+  <div class="container">
+
+    <header>
+      <div class="logo">SABI</div>
+      <div class="badge">AI Homework Helper</div>
+    </header>
+
+    <section class="hero">
+      <h1>Welcome to SABI 👋</h1>
+      <p>
+        Ask questions, understand your homework,<br>
+        and learn step by step with SABI.
+      </p>
+    </section>
+
+    <div class="subjects">
+      <button class="subject" onclick="setSubject('Math')">📐 Math</button>
+      <button class="subject" onclick="setSubject('Science')">🔬 Science</button>
+      <button class="subject" onclick="setSubject('English')">📚 English</button>
+      <button class="subject" onclick="setSubject('History')">🌍 History</button>
+    </div>
+
+    <div class="chat-box">
+
+      <div id="answer">
+        👋 Hi! I'm SABI. Ask me a homework question and I'll help you.
       </div>
-    </div><div class="pro-badge">1 MONTH FREE</div>
 
-  </header>  <main class="chat"><section class="hero">
-
-  <div class="hero-icon">🤖</div>
-
-  <h2>What can I help you learn?</h2>
-
-  <p>
-    Ask a question, upload your homework,
-    and let SABI help you understand it step by step.
-  </p>
-
-</section>
-
-
-<div class="section-title">Choose a subject</div>
-
-<div class="subjects">
-
-  <div class="subject" onclick="chooseSubject('Math')">
-    <span class="subject-icon">📐</span>
-    Math
-  </div>
-
-  <div class="subject" onclick="chooseSubject('Science')">
-    <span class="subject-icon">🔬</span>
-    Science
-  </div>
-
-  <div class="subject" onclick="chooseSubject('English')">
-    <span class="subject-icon">📖</span>
-    English
-  </div>
-
-  <div class="subject" onclick="chooseSubject('History')">
-    <span class="subject-icon">🌎</span>
-    History
-  </div>
-
-</div>
-
-
-<div id="answer"></div>
-
-  </main>  <div class="input-wrapper"><div class="input-area">
-
-  <div class="textarea-wrap">
-
-    <textarea
-      id="question"
-      placeholder="Ask SABI anything about your homework..."
-    ></textarea>
-
-  </div>
-
-
-  <div class="bottom-row">
-
-    <div class="tools">
-
-      <label class="tool-btn" title="Upload homework photo">
-        📎
+      <div class="input-area">
         <input
-          type="file"
-          id="photo"
-          accept="image/*"
-          onchange="showFile()"
+          id="question"
+          type="text"
+          placeholder="Ask SABI anything..."
+          onkeydown="handleEnter(event)"
         >
+
+        <button class="send-btn" id="sendBtn" onclick="askSabi()">
+          Send
+        </button>
+      </div>
+
+      <label class="upload-label" for="fileInput">
+        📷 Upload Homework Photo
       </label>
 
-      <button class="tool-btn" type="button" onclick="clearQuestion()">
-        ↺
-      </button>
+      <input
+        id="fileInput"
+        type="file"
+        accept="image/*"
+        onchange="showFile()"
+      >
+
+      <div id="fileName"></div>
 
     </div>
 
-
-    <button class="send-btn" onclick="askSabi()">
-      ↑
-    </button>
+    <footer>
+      SABI • Learn smarter, one question at a time.
+    </footer>
 
   </div>
 
-  <div id="fileName" class="file-name"></div>
+  <script>
 
-</div>
+    let selectedSubject = "";
 
-<div class="hint">
-  SABI can help explain homework questions step by step.
-</div>
+    function setSubject(subject) {
+      selectedSubject = subject;
 
-  </div></div><script>
+      const questionBox = document.getElementById("question");
 
-  function chooseSubject(subject) {
+      questionBox.value = "";
+      questionBox.placeholder =
+        "Ask your " + subject + " question...";
 
-    const question = document.getElementById("question");
-
-    question.value =
-      "I need help with " + subject + ". ";
-
-    question.focus();
-  }
-
-
-  function showFile() {
-
-    const fileInput = document.getElementById("photo");
-    const fileName = document.getElementById("fileName");
-
-    if (fileInput.files.length > 0) {
-
-      fileName.style.display = "block";
-
-      fileName.innerHTML =
-        "📎 " + fileInput.files[0].name;
-
-    }
-  }
-
-
-  function clearQuestion() {
-
-    document.getElementById("question").value = "";
-
-    document.getElementById("fileName").style.display = "none";
-
-    document.getElementById("answer").style.display = "none";
-  }
-
-
-  function askSabi() {
-
-    const question =
-      document.getElementById("question").value.trim();
-
-    const answer =
-      document.getElementById("answer");
-
-    if (!question) {
-
-      answer.style.display = "block";
-
-      answer.innerHTML =
-        "<div class='answer-title'>SABI</div>" +
-        "Please type your homework question first.";
-
-      return;
+      questionBox.focus();
     }
 
+    function showFile() {
+      const fileInput = document.getElementById("fileInput");
+      const fileName = document.getElementById("fileName");
 
-    answer.style.display = "block";
+      if (fileInput.files.length > 0) {
+        fileName.textContent =
+          "📎 Selected: " + fileInput.files[0].name;
+      }
+    }
 
-    answer.innerHTML =
-      "<div class='answer-title'>✦ SABI</div>" +
-      "I received your question!<br><br>" +
-      "The AI answer system will be connected next. " +
-      "Soon SABI will be able to explain your homework step by step.";
+    function handleEnter(event) {
+      if (event.key === "Enter") {
+        askSabi();
+      }
+    }
 
-    answer.scrollIntoView({
-      behavior: "smooth",
-      block: "center"
-    });
+    async function askSabi() {
 
-  }
+      const questionBox = document.getElementById("question");
+      const answerBox = document.getElementById("answer");
+      const sendBtn = document.getElementById("sendBtn");
 
-</script></body>
+      const question = questionBox.value.trim();
+
+      if (!question) {
+        answerBox.textContent =
+          "Please type a question first.";
+        return;
+      }
+
+      sendBtn.disabled = true;
+      sendBtn.textContent = "Thinking...";
+
+      answerBox.textContent =
+        "🤔 SABI is thinking...";
+
+      try {
+
+        const finalQuestion = selectedSubject
+          ? "Subject: " + selectedSubject + "\n\n" + question
+          : question;
+
+        const response = await fetch("/api/ask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            question: finalQuestion
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || "Request failed");
+        }
+
+        answerBox.textContent =
+          data.answer || "Sorry, I couldn't generate an answer.";
+
+      } catch (error) {
+
+        answerBox.textContent =
+          "Sorry 😔 Something went wrong. Please try again.";
+
+      } finally {
+
+        sendBtn.disabled = false;
+        sendBtn.textContent = "Send";
+
+      }
+    }
+
+  </script>
+
+</body>
 </html>
