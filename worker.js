@@ -2,7 +2,6 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
 
-    // SABI AI homework API
     if (url.pathname === "/api/ask" && request.method === "POST") {
       try {
         const data = await request.json();
@@ -15,19 +14,24 @@ export default {
           );
         }
 
-        const prompt = `You are SABI, a friendly AI homework helper for students.
+        const prompt = `You are SABI, a simple and friendly AI homework helper.
 
-Answer ONLY the student's current question below.
+Answer ONLY the student's current question.
 
-Rules:
-- Do not remember or continue previous questions.
-- Do not add unrelated questions or previous answers.
-- Explain clearly and step by step when useful.
-- Use simple language suitable for students.
-- For math, calculate the exact answer carefully.
-- Give the final answer clearly.
+IMPORTANT RULES:
+- Give a direct answer to the question.
+- For simple math, give the correct numerical answer first.
+- Show short working when helpful.
+- Use simple student-friendly language.
+- Do NOT use hashtags.
+- Do NOT add labels such as #math, #answer, #mathresult, or #numbers.
+- Do NOT repeat the answer.
+- Do NOT invent extra questions.
+- Do NOT include social-media style text.
+- Do NOT continue any previous conversation.
+- Answer only the current question.
 
-CURRENT STUDENT QUESTION:
+CURRENT QUESTION:
 ${question}`;
 
         const result = await env.AI.run(
@@ -37,23 +41,8 @@ ${question}`;
           }
         );
 
-        return Response.json({
-          answer:
-            result?.response ||
-            "Sorry, I couldn't generate an answer."
-        });
+        let answer = String(result?.response || "").trim();
 
-      } catch (error) {
-        return Response.json(
-          {
-            error: "Sorry, something went wrong. Please try again."
-          },
-          { status: 500 }
-        );
-      }
-    }
-
-    // Serve the SABI website
-    return env.ASSETS.fetch(request);
-  }
-};
+        // Remove accidental hashtags/social-media text.
+        answer = answer
+          .replace(/#[A-Za-z0
