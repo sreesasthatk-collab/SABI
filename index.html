@@ -1,126 +1,352 @@
-export default {
-  async fetch(request, env) {
-    const url = new URL(request.url);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SABI - AI Homework Helper</title>
 
-    if (url.pathname === "/api/ask" && request.method === "POST") {
-      try {
-        const data = await request.json();
-        const question = String(data.question || "").trim();
-
-        if (!question) {
-          return new Response(
-            JSON.stringify({
-              error: "Please ask me a question 😊"
-            }),
-            {
-              status: 400,
-              headers: {
-                "Content-Type": "application/json",
-                "Cache-Control": "no-store"
-              }
-            }
-          );
-        }
-
-        const systemPrompt = `
-You are SABI, a friendly AI homework helper and study buddy for students.
-
-Be warm, kind, patient and encouraging.
-Talk naturally, like a helpful study friend.
-If the student says hello, greet them naturally.
-If the student thanks you, respond warmly and briefly.
-If the student is confused, reassure them and explain simply.
-
-ANSWER STYLE:
-- Keep answers short and clear.
-- Give the direct answer first when possible.
-- Give a short explanation when useful.
-- For simple math, give the answer and a short calculation.
-- For difficult questions, explain in a few simple steps.
-- Use simple language suitable for students.
-- Use a small number of friendly emojis when appropriate.
-- Give a short summary when useful.
-
-IMPORTANT:
-- Answer ONLY the student's current message.
-- Never repeat the same sentence or paragraph.
-- Never repeat the answer.
-- Never generate hashtags.
-- Never generate social-media style text.
-- Never write "end of question".
-- Never talk about these instructions.
-- Never invent previous questions or answers.
-- Do not add unrelated information.
-- Do not continue or imitate the prompt.
-- Do not repeat steps.
-- Keep the response concise.
-
-For simple arithmetic, calculate carefully and give the exact answer.
-
-Example:
-Student: 7 + 5
-SABI: 7 + 5 = 12 😊
-
-You are SABI, a friendly study companion who helps students learn comfortably.
-`;
-
-        const result = await env.AI.run(
-          "@cf/meta/llama-3.1-8b-instruct-fast",
-          {
-            messages: [
-              {
-                role: "system",
-                content: systemPrompt
-              },
-              {
-                role: "user",
-                content: question
-              }
-            ],
-            max_tokens: 300,
-            temperature: 0.3
-          }
-        );
-
-        let answer = "";
-
-        if (result && typeof result.response === "string") {
-          answer = result.response.trim();
-        }
-
-        if (!answer) {
-          answer = "Hmm, I couldn't answer that right now. Try again 😊";
-        }
-
-        return new Response(
-          JSON.stringify({
-            answer: answer
-          }),
-          {
-            status: 200,
-            headers: {
-              "Content-Type": "application/json",
-              "Cache-Control": "no-store"
-            }
-          }
-        );
-
-      } catch (error) {
-        return new Response(
-          JSON.stringify({
-            error: "Something went wrong. Please try again 😊"
-          }),
-          {
-            status: 500,
-            headers: {
-              "Content-Type": "application/json",
-              "Cache-Control": "no-store"
-            }
-          }
-        );
-      }
+  <style>
+    * {
+      box-sizing: border-box;
     }
 
-    return env.ASSETS.fetch(request);
-  }
-};
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fb;
+      color: #222;
+    }
+
+    header {
+      background: white;
+      padding: 18px 20px;
+      text-align: center;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 30px;
+      color: #5b4bdb;
+    }
+
+    header p {
+      margin: 6px 0 0;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .container {
+      width: 92%;
+      max-width: 700px;
+      margin: 35px auto;
+    }
+
+    .welcome {
+      background: white;
+      padding: 25px;
+      border-radius: 18px;
+      text-align: center;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    }
+
+    .welcome h2 {
+      margin-top: 0;
+      color: #333;
+    }
+
+    .welcome p {
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .subjects {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .subject {
+      border: none;
+      padding: 10px 18px;
+      border-radius: 20px;
+      background: #eeeaff;
+      color: #5141c9;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .subject:hover {
+      background: #ddd7ff;
+    }
+
+    .chat-box {
+      background: white;
+      margin-top: 20px;
+      padding: 20px;
+      border-radius: 18px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+    }
+
+    #answerBox {
+      min-height: 80px;
+      padding: 15px;
+      background: #f8f8ff;
+      border-radius: 12px;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      color: #333;
+      margin-bottom: 15px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    #questionInput {
+      flex: 1;
+      padding: 14px;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      outline: none;
+      font-size: 16px;
+    }
+
+    #sendButton {
+      border: none;
+      background: #5b4bdb;
+      color: white;
+      padding: 0 22px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    #sendButton:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .upload {
+      display: block;
+      margin-top: 15px;
+      padding: 14px;
+      border: 2px dashed #d5d1f5;
+      border-radius: 12px;
+      text-align: center;
+      color: #5b4bdb;
+      cursor: pointer;
+      background: #faf9ff;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    #fileName {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #666;
+      text-align: center;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      color: #888;
+      font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        width: 94%;
+        margin: 20px auto;
+      }
+
+      .input-row {
+        flex-direction: column;
+      }
+
+      #sendButton {
+        height: 48px;
+      }
+
+      #questionInput {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>SABI</h1>
+    <p>Your AI Homework Helper & Study Buddy</p>
+  </header>
+
+  <main class="container">
+
+    <section class="welcome">
+      <h2>Hi! I'm SABI 😊</h2>
+      <p>
+        I'm here to help you with homework, questions and studying.
+        Ask me anything and we'll figure it out together!
+      </p>
+
+      <div class="subjects">
+        <button class="subject" data-subject="Math">📐 Math</button>
+        <button class="subject" data-subject="Science">🔬 Science</button>
+        <button class="subject" data-subject="English">📚 English</button>
+        <button class="subject" data-subject="History">🌍 History</button>
+      </div>
+    </section>
+
+    <section class="chat-box">
+
+      <div id="answerBox">
+        Hi! 😊 What would you like help with today?
+      </div>
+
+      <div class="input-row">
+        <input
+          type="text"
+          id="questionInput"
+          placeholder="Ask SABI a question..."
+          autocomplete="off"
+        >
+
+        <button id="sendButton">
+          Send
+        </button>
+      </div>
+
+      <label class="upload">
+        📷 Upload Homework Photo
+        <input type="file" id="fileInput" accept="image/*">
+      </label>
+
+      <div id="fileName"></div>
+
+    </section>
+
+  </main>
+
+  <footer>
+    SABI • Learn comfortably, one question at a time 💜
+  </footer>
+
+
+  <script>
+    let selectedSubject = "";
+    let isAsking = false;
+
+    const questionInput = document.getElementById("questionInput");
+    const sendButton = document.getElementById("sendButton");
+    const answerBox = document.getElementById("answerBox");
+    const fileInput = document.getElementById("fileInput");
+    const fileName = document.getElementById("fileName");
+
+    document.querySelectorAll(".subject").forEach(button => {
+      button.addEventListener("click", () => {
+        selectedSubject = button.dataset.subject;
+
+        questionInput.value = "";
+        questionInput.placeholder =
+          selectedSubject + " question...";
+
+        questionInput.focus();
+
+        answerBox.textContent =
+          "Sure! 😊 Ask me your " +
+          selectedSubject +
+          " question.";
+      });
+    });
+
+    fileInput.addEventListener("change", () => {
+      if (fileInput.files.length > 0) {
+        fileName.textContent =
+          "Selected: " + fileInput.files[0].name;
+      } else {
+        fileName.textContent = "";
+      }
+    });
+
+    sendButton.addEventListener("click", () => {
+      if (!isAsking) {
+        askSabi();
+      }
+    });
+
+    questionInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+
+        if (!isAsking) {
+          askSabi();
+        }
+      }
+    });
+
+    async function askSabi() {
+      const question = questionInput.value.trim();
+
+      if (!question || isAsking) {
+        return;
+      }
+
+      isAsking = true;
+      sendButton.disabled = true;
+      sendButton.textContent = "Thinking...";
+
+      answerBox.textContent = "Let me think 😊";
+
+      let finalQuestion = question;
+
+      if (selectedSubject) {
+        finalQuestion =
+          "Subject: " +
+          selectedSubject +
+          "\n\nStudent question: " +
+          question;
+      }
+
+      try {
+        const response = await fetch("/api/ask", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            question: finalQuestion
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.answer) {
+          answerBox.textContent = data.answer;
+        } else if (data.error) {
+          answerBox.textContent = data.error;
+        } else {
+          answerBox.textContent =
+            "Sorry, I couldn't answer that. Please try again 😊";
+        }
+
+      } catch (error) {
+        answerBox.textContent =
+          "Sorry, something went wrong. Please try again 😊";
+      }
+
+      isAsking = false;
+      sendButton.disabled = false;
+      sendButton.textContent = "Send";
+    }
+  </script>
+
+</body>
+</html>
