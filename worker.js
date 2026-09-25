@@ -19,16 +19,14 @@ export default {
 Answer ONLY the student's current question.
 
 IMPORTANT RULES:
-- Give a direct answer to the question.
+- Give a direct answer.
 - For simple math, give the correct numerical answer first.
-- Show short working when helpful.
+- Show short working when useful.
 - Use simple student-friendly language.
-- Do NOT use hashtags.
-- Do NOT add labels such as #math, #answer, #mathresult, or #numbers.
-- Do NOT repeat the answer.
-- Do NOT invent extra questions.
-- Do NOT include social-media style text.
-- Do NOT continue any previous conversation.
+- Do not use hashtags.
+- Do not repeat the answer.
+- Do not add unrelated questions.
+- Do not continue previous conversations.
 - Answer only the current question.
 
 CURRENT QUESTION:
@@ -37,12 +35,43 @@ ${question}`;
         const result = await env.AI.run(
           "@cf/meta/llama-3.1-8b-instruct-fast",
           {
-            prompt
+            prompt: prompt
           }
         );
 
         let answer = String(result?.response || "").trim();
 
-        // Remove accidental hashtags/social-media text.
-        answer = answer
-          .replace(/#[A-Za-z0
+        if (!answer) {
+          answer = "Sorry, I couldn't generate an answer.";
+        }
+
+        return new Response(
+          JSON.stringify({ answer: answer }),
+          {
+            status: 200,
+            headers: {
+              "Content-Type": "application/json",
+              "Cache-Control": "no-store"
+            }
+          }
+        );
+
+      } catch (error) {
+        return new Response(
+          JSON.stringify({
+            error: "Sorry, something went wrong. Please try again."
+          }),
+          {
+            status: 500,
+            headers: {
+              "Content-Type": "application/json",
+              "Cache-Control": "no-store"
+            }
+          }
+        );
+      }
+    }
+
+    return env.ASSETS.fetch(request);
+  }
+};
