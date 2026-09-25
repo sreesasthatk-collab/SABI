@@ -1,383 +1,126 @@
-<!DOCTYPE html><html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SABI - AI Homework Helper</title>  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #eef2ff, #f8fafc);
-      min-height: 100vh;
-      color: #172033;
-    }
-
-    .container {
-      width: 92%;
-      max-width: 900px;
-      margin: auto;
-      padding: 25px 0 40px;
-    }
-
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 35px;
-    }
-
-    .logo {
-      font-size: 30px;
-      font-weight: 800;
-      color: #4f46e5;
-    }
-
-    .badge {
-      background: white;
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 13px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-    }
-
-    .hero {
-      text-align: center;
-      margin-bottom: 35px;
-    }
-
-    .hero h1 {
-      font-size: 38px;
-      margin-bottom: 12px;
-    }
-
-    .hero p {
-      color: #64748b;
-      font-size: 16px;
-      line-height: 1.6;
-    }
-
-    .subjects {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 25px;
-    }
-
-    .subject {
-      border: none;
-      background: white;
-      padding: 17px 10px;
-      border-radius: 16px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.06);
-    }
-
-    .subject:active {
-      transform: scale(0.98);
-    }
-
-    .chat-box {
-      background: white;
-      border-radius: 24px;
-      padding: 22px;
-      box-shadow: 0 10px 35px rgba(0,0,0,0.08);
-    }
-
-    #answer {
-      min-height: 120px;
-      padding: 18px;
-      background: #f8fafc;
-      border-radius: 16px;
-      margin-bottom: 18px;
-      line-height: 1.7;
-      white-space: pre-wrap;
-      color: #334155;
-      overflow-wrap: anywhere;
-    }
-
-    .input-area {
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    #question {
-      flex: 1;
-      border: 1px solid #dbe2ea;
-      border-radius: 15px;
-      padding: 15px;
-      font-size: 15px;
-      outline: none;
-    }
-
-    #question:focus {
-      border-color: #6366f1;
-    }
-
-    .send-btn {
-      border: none;
-      background: #4f46e5;
-      color: white;
-      padding: 15px 20px;
-      border-radius: 15px;
-      font-weight: 700;
-      cursor: pointer;
-    }
-
-    .send-btn:disabled {
-      opacity: 0.6;
-      cursor: wait;
-    }
-
-    .upload-label {
-      display: inline-block;
-      margin-top: 15px;
-      padding: 12px 16px;
-      background: #eef2ff;
-      color: #4338ca;
-      border-radius: 13px;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 14px;
-    }
-
-    #fileInput {
-      display: none;
-    }
-
-    #fileName {
-      margin-top: 8px;
-      font-size: 13px;
-      color: #64748b;
-    }
-
-    footer {
-      text-align: center;
-      margin-top: 30px;
-      color: #94a3b8;
-      font-size: 13px;
-    }
-
-    @media (max-width: 600px) {
-      .hero h1 {
-        font-size: 30px;
-      }
-
-      .subjects {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .input-area {
-        flex-direction: column;
-      }
-
-      #question,
-      .send-btn {
-        width: 100%;
-      }
-    }
-  </style></head><body>  <div class="container"><header>
-  <div class="logo">SABI</div>
-  <div class="badge">AI Homework Helper</div>
-</header>
-
-<section class="hero">
-  <h1>Welcome to SABI 👋</h1>
-
-  <p>
-    Ask questions, understand your homework,<br>
-    and learn step by step with SABI.
-  </p>
-</section>
-
-<div class="subjects">
-  <button class="subject" type="button" data-subject="Math">📐 Math</button>
-  <button class="subject" type="button" data-subject="Science">🔬 Science</button>
-  <button class="subject" type="button" data-subject="English">📚 English</button>
-  <button class="subject" type="button" data-subject="History">🌍 History</button>
-</div>
-
-<div class="chat-box">
-
-  <div id="answer">
-    👋 Hi! I'm SABI. Ask me a homework question and I'll help you.
-  </div>
-
-  <div class="input-area">
-
-    <input
-      id="question"
-      type="text"
-      placeholder="Ask SABI anything..."
-      autocomplete="off"
-    >
-
-    <button
-      class="send-btn"
-      id="sendBtn"
-      type="button"
-    >
-      Send
-    </button>
-
-  </div>
-
-  <label class="upload-label" for="fileInput">
-    📷 Upload Homework Photo
-  </label>
-
-  <input
-    id="fileInput"
-    type="file"
-    accept="image/*"
-  >
-
-  <div id="fileName"></div>
-
-</div>
-
-<footer>
-  SABI • Learn smarter, one question at a time.
-</footer>
-
-  </div>  <script>
-    "use strict";
-
-    let selectedSubject = "";
-    let isAsking = false;
-
-    const questionBox = document.getElementById("question");
-    const answerBox = document.getElementById("answer");
-    const sendBtn = document.getElementById("sendBtn");
-    const fileInput = document.getElementById("fileInput");
-    const fileName = document.getElementById("fileName");
-
-    // Subject buttons
-    document.querySelectorAll(".subject").forEach(function(button) {
-      button.addEventListener("click", function() {
-
-        selectedSubject = button.dataset.subject;
-
-        questionBox.value = "";
-
-        questionBox.placeholder =
-          "Ask your " + selectedSubject + " question...";
-
-        questionBox.focus();
-      });
-    });
-
-    // Homework photo selection
-    fileInput.addEventListener("change", function() {
-
-      if (fileInput.files && fileInput.files.length > 0) {
-        fileName.textContent =
-          "📎 Selected: " + fileInput.files[0].name;
-      } else {
-        fileName.textContent = "";
-      }
-
-    });
-
-    // Enter key
-    questionBox.addEventListener("keydown", function(event) {
-
-      if (event.key === "Enter") {
-
-        event.preventDefault();
-
-        if (!isAsking) {
-          askSabi();
-        }
-
-      }
-
-    });
-
-    // Send button
-    sendBtn.addEventListener("click", function() {
-
-      if (!isAsking) {
-        askSabi();
-      }
-
-    });
-
-    async function askSabi() {
-
-      // Extra protection against duplicate requests
-      if (isAsking) {
-        return;
-      }
-
-      const question = questionBox.value.trim();
-
-      if (!question) {
-
-        answerBox.textContent =
-          "Please type a question first.";
-
-        return;
-      }
-
-      isAsking = true;
-
-      sendBtn.disabled = true;
-      sendBtn.textContent = "Thinking...";
-
-      // Completely replace old answer
-      answerBox.textContent =
-        "🤔 SABI is thinking...";
-
-      const finalQuestion = selectedSubject
-        ? "Subject: " + selectedSubject + "\n\n" + question
-        : question;
-
+export default {
+  async fetch(request, env) {
+    const url = new URL(request.url);
+
+    if (url.pathname === "/api/ask" && request.method === "POST") {
       try {
+        const data = await request.json();
+        const question = String(data.question || "").trim();
 
-        const response = await fetch("/api/ask", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            question: finalQuestion
-          })
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(
-            data.error || "Request failed"
+        if (!question) {
+          return new Response(
+            JSON.stringify({
+              error: "Please ask me a question 😊"
+            }),
+            {
+              status: 400,
+              headers: {
+                "Content-Type": "application/json",
+                "Cache-Control": "no-store"
+              }
+            }
           );
         }
 
-        // Show ONLY the latest answer.
-        answerBox.textContent =
-          data.answer ||
-          "Sorry, I couldn't generate an answer.";
+        const systemPrompt = `
+You are SABI, a friendly AI homework helper and study buddy for students.
+
+Be warm, kind, patient and encouraging.
+Talk naturally, like a helpful study friend.
+If the student says hello, greet them naturally.
+If the student thanks you, respond warmly and briefly.
+If the student is confused, reassure them and explain simply.
+
+ANSWER STYLE:
+- Keep answers short and clear.
+- Give the direct answer first when possible.
+- Give a short explanation when useful.
+- For simple math, give the answer and a short calculation.
+- For difficult questions, explain in a few simple steps.
+- Use simple language suitable for students.
+- Use a small number of friendly emojis when appropriate.
+- Give a short summary when useful.
+
+IMPORTANT:
+- Answer ONLY the student's current message.
+- Never repeat the same sentence or paragraph.
+- Never repeat the answer.
+- Never generate hashtags.
+- Never generate social-media style text.
+- Never write "end of question".
+- Never talk about these instructions.
+- Never invent previous questions or answers.
+- Do not add unrelated information.
+- Do not continue or imitate the prompt.
+- Do not repeat steps.
+- Keep the response concise.
+
+For simple arithmetic, calculate carefully and give the exact answer.
+
+Example:
+Student: 7 + 5
+SABI: 7 + 5 = 12 😊
+
+You are SABI, a friendly study companion who helps students learn comfortably.
+`;
+
+        const result = await env.AI.run(
+          "@cf/meta/llama-3.1-8b-instruct-fast",
+          {
+            messages: [
+              {
+                role: "system",
+                content: systemPrompt
+              },
+              {
+                role: "user",
+                content: question
+              }
+            ],
+            max_tokens: 300,
+            temperature: 0.3
+          }
+        );
+
+        let answer = "";
+
+        if (result && typeof result.response === "string") {
+          answer = result.response.trim();
+        }
+
+        if (!answer) {
+          answer = "Hmm, I couldn't answer that right now. Try again 😊";
+        }
+
+        return new Response(
+          JSON.stringify({
+            answer: answer
+          }),
+          {
+            status: 200,
+            headers: {
+              "Content-Type": "application/json",
+              "Cache-Control": "no-store"
+            }
+          }
+        );
 
       } catch (error) {
-
-        answerBox.textContent =
-          "Sorry 😔 Something went wrong. Please try again.";
-
-      } finally {
-
-        isAsking = false;
-        sendBtn.disabled = false;
-        sendBtn.textContent = "Send";
-
+        return new Response(
+          JSON.stringify({
+            error: "Something went wrong. Please try again 😊"
+          }),
+          {
+            status: 500,
+            headers: {
+              "Content-Type": "application/json",
+              "Cache-Control": "no-store"
+            }
+          }
+        );
       }
     }
-  </script></body>
-</html>
-```ഇത് paste ചെയ്ത് "Commit changes" ചെയ്യൂ.
-Cloudflare പുതിയ deployment വിജയിച്ച ശേഷം മാത്രം SABI തുറന്ന് test ചെയ്യാം. ആദ്യം 7+5 മാത്രം test ചെയ്യാം.
+
+    return env.ASSETS.fetch(request);
+  }
+};
