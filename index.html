@@ -79,7 +79,6 @@
       font-weight: 600;
       cursor: pointer;
       box-shadow: 0 5px 20px rgba(0,0,0,0.06);
-      transition: 0.2s;
     }
 
     .subject:hover {
@@ -102,6 +101,7 @@
       line-height: 1.7;
       white-space: pre-wrap;
       color: #334155;
+      overflow-wrap: anywhere;
     }
 
     .input-area {
@@ -219,16 +219,22 @@
       </div>
 
       <div class="input-area">
+
         <input
           id="question"
           type="text"
           placeholder="Ask SABI anything..."
-          onkeydown="handleEnter(event)"
+          autocomplete="off"
         >
 
-        <button class="send-btn" id="sendBtn" onclick="askSabi()">
+        <button
+          class="send-btn"
+          id="sendBtn"
+          type="button"
+        >
           Send
         </button>
+
       </div>
 
       <label class="upload-label" for="fileInput">
@@ -239,7 +245,6 @@
         id="fileInput"
         type="file"
         accept="image/*"
-        onchange="showFile()"
       >
 
       <div id="fileName"></div>
@@ -256,53 +261,72 @@
 
     let selectedSubject = "";
 
+    const questionBox = document.getElementById("question");
+    const answerBox = document.getElementById("answer");
+    const sendBtn = document.getElementById("sendBtn");
+    const fileInput = document.getElementById("fileInput");
+    const fileName = document.getElementById("fileName");
+
     function setSubject(subject) {
+
       selectedSubject = subject;
 
-      const questionBox = document.getElementById("question");
-
       questionBox.value = "";
+
       questionBox.placeholder =
         "Ask your " + subject + " question...";
 
       questionBox.focus();
     }
 
-    function showFile() {
-      const fileInput = document.getElementById("fileInput");
-      const fileName = document.getElementById("fileName");
+    fileInput.addEventListener("change", function () {
 
       if (fileInput.files.length > 0) {
+
         fileName.textContent =
           "📎 Selected: " + fileInput.files[0].name;
-      }
-    }
 
-    function handleEnter(event) {
-      if (event.key === "Enter") {
-        askSabi();
+      } else {
+
+        fileName.textContent = "";
+
       }
-    }
+
+    });
+
+    questionBox.addEventListener("keydown", function(event) {
+
+      if (event.key === "Enter") {
+
+        event.preventDefault();
+
+        askSabi();
+
+      }
+
+    });
+
+    sendBtn.addEventListener("click", askSabi);
 
     async function askSabi() {
-
-      const questionBox = document.getElementById("question");
-      const answerBox = document.getElementById("answer");
-      const sendBtn = document.getElementById("sendBtn");
 
       const question = questionBox.value.trim();
 
       if (!question) {
+
         answerBox.textContent =
           "Please type a question first.";
+
         return;
+
       }
+
+      // Clear the previous answer completely.
+      answerBox.textContent =
+        "🤔 SABI is thinking...";
 
       sendBtn.disabled = true;
       sendBtn.textContent = "Thinking...";
-
-      answerBox.textContent =
-        "🤔 SABI is thinking...";
 
       try {
 
@@ -311,23 +335,34 @@
           : question;
 
         const response = await fetch("/api/ask", {
+
           method: "POST",
+
           headers: {
             "Content-Type": "application/json"
           },
+
           body: JSON.stringify({
             question: finalQuestion
           })
+
         });
 
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || "Request failed");
+
+          throw new Error(
+            data.error || "Request failed"
+          );
+
         }
 
+        // Replace the previous answer.
+        // Never append to the old answer.
         answerBox.textContent =
-          data.answer || "Sorry, I couldn't generate an answer.";
+          data.answer ||
+          "Sorry, I couldn't generate an answer.";
 
       } catch (error) {
 
@@ -340,6 +375,7 @@
         sendBtn.textContent = "Send";
 
       }
+
     }
 
   </script>
