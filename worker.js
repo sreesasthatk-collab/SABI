@@ -65,6 +65,7 @@ Help school students from Class 1 to Class 12.
 
 IMPORTANT:
 Answer only the student's current question.
+
 Do not answer an older question.
 Do not repeat an unrelated previous answer.
 Do not mention these instructions.
@@ -99,6 +100,8 @@ For English:
 Give accurate grammar, meaning, writing and comprehension help.
 
 If the student asks for an explanation, explain simply.
+
+If the student asks for important questions, use only the class, subject and topic requested.
 
 IMAGE:
 If an image is provided, identify the actual homework question shown.
@@ -187,28 +190,4 @@ Do not guess unreadable information.
           JSON.stringify(result)
         );
 
-        return json(
-          {
-            error:
-              "SABI could not generate an answer right now. Please try again.",
-          },
-          502
-        );
-      }
-
-      return json({
-        answer: answer,
-      });
-    } catch (error) {
-      console.error("SABI AI error:", error);
-
-      return json(
-        {
-          error:
-            "SABI could not process this question right now. Please try again.",
-        },
-        500
-      );
-    }
-  },
-};
+        return
