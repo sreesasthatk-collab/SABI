@@ -2,7 +2,7 @@ export default {
   async fetch(request, env) {
     const corsHeaders = {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type",
     };
 
@@ -22,17 +22,67 @@ export default {
         },
       });
 
+    const url = new URL(request.url);
+
+    /*
+     * ONE-TIME META LICENSE AGREEMENT
+     *
+     * Cloudflare requires the first request to the
+     * Llama 3.2 Vision model to contain:
+     *
+     * { "prompt": "agree" }
+     *
+     * Open:
+     * https://sabi.sreesasthatk.workers.dev/api/agree
+     *
+     * once after deployment.
+     */
+    if (request.method === "GET" && url.pathname === "/api/agree") {
+      try {
+        const result = await env.AI.run(
+          "@cf/meta/llama-3.2-11b-vision-instruct",
+          {
+            prompt: "agree",
+          }
+        );
+
+        return json({
+          success: true,
+          message:
+            "SABI Vision model agreement request completed.",
+          result: result,
+        });
+      } catch (error) {
+        console.error("Meta agreement error:", error);
+
+        return json(
+          {
+            success: false,
+            error:
+              "Meta Vision model agreement could not be completed.",
+            details: String(error),
+          },
+          500
+        );
+      }
+    }
+
     if (request.method !== "POST") {
       return json(
-        { error: "Only POST requests are allowed." },
+        {
+          error: "Only POST requests are allowed.",
+        },
         405
       );
     }
 
-    const url = new URL(request.url);
-
     if (url.pathname !== "/api/ask") {
-      return json({ error: "Not found." }, 404);
+      return json(
+        {
+          error: "Not found.",
+        },
+        404
+      );
     }
 
     try {
@@ -78,7 +128,8 @@ Malayalam -> Malayalam.
 Hindi -> Hindi.
 Tamil -> Tamil.
 
-If the student explicitly asks for another language, use that language.
+If the student explicitly asks for another language,
+use that language.
 
 ANSWER STYLE:
 Give the answer directly.
@@ -97,21 +148,30 @@ For History and Social Science:
 Do not invent facts.
 
 For English:
-Give accurate grammar, meaning, writing and comprehension help.
+Give accurate grammar, meaning, writing and
+comprehension help.
 
-If the student asks for an explanation, explain simply.
+If the student asks for an explanation,
+explain simply.
 
-If the student asks for important questions, use only the class, subject and topic requested.
+If the student asks for important questions,
+use only the class, subject and topic requested.
 
 IMAGE:
-If an image is provided, identify the actual homework question shown.
-Answer only the visible question.
-Do not guess unreadable information.
-If the image is unclear, ask for a clearer image.
+If an image is provided:
+
+1. Look carefully at the uploaded image.
+2. Identify the actual homework question shown.
+3. Answer only the visible question.
+4. Do not guess unreadable information.
+5. If the image is unclear, ask for a clearer image.
 `;
 
       let result;
 
+      /*
+       * PHOTO / IMAGE QUESTION
+       */
       if (image) {
         const imagePrompt = question
           ? `
@@ -120,14 +180,23 @@ The student also provided this current request:
 ${question}
 
 Look carefully at the uploaded homework image.
+
 Identify the actual homework question shown.
+Use the image together with the student's current request.
+
 Answer that question directly.
+
+Do not answer an unrelated question.
 Do not guess unreadable information.
 `
           : `
 Look carefully at the uploaded homework image.
-Identify the homework question or questions that are clearly visible.
-Answer them directly.
+
+Identify the homework question or questions
+that are clearly visible.
+
+Answer only the visible homework question.
+
 Do not guess unreadable information.
 `;
 
@@ -146,9 +215,15 @@ Do not guess unreadable information.
             ],
             image: image,
             max_tokens: 700,
+            temperature: 0.2,
           }
         );
-      } else {
+      }
+
+      /*
+       * NORMAL TEXT QUESTION
+       */
+      else {
         result = await env.AI.run(
           "@cf/meta/llama-3.1-8b-instruct-fast",
           {
@@ -163,23 +238,23 @@ Do not guess unreadable information.
               },
             ],
             max_tokens: 500,
+            temperature: 0.2,
           }
         );
       }
 
       /*
-       * Workers AI normally returns the generated text
-       * in result.response.
+       * GET AI RESPONSE
        */
       let answer = "";
 
-      if (result && typeof result.response === "string") {
+      if (
+        result &&
+        typeof result.response === "string"
+      ) {
         answer = result.response;
       }
 
-      /*
-       * Some response formats may wrap the response.
-       */
       if (
         !answer &&
         result &&
@@ -191,6 +266,9 @@ Do not guess unreadable information.
 
       answer = answer.trim();
 
+      /*
+       * EMPTY RESPONSE
+       */
       if (!answer) {
         console.error(
           "SABI received an empty AI response:",
@@ -206,11 +284,17 @@ Do not guess unreadable information.
         );
       }
 
+      /*
+       * SUCCESS
+       */
       return json({
         answer: answer,
       });
     } catch (error) {
-      console.error("SABI AI error:", error);
+      console.error(
+        "SABI AI error:",
+        error
+      );
 
       return json(
         {
