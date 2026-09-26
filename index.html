@@ -153,6 +153,18 @@
       text-align: center;
     }
 
+    .remove-image {
+      display: none;
+      margin: 8px auto 0;
+      border: none;
+      background: #f1f1f1;
+      color: #555;
+      padding: 7px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+
     footer {
       text-align: center;
       padding: 25px;
@@ -192,6 +204,7 @@
 
     <section class="welcome">
       <h2>Hi! I'm SABI 😊</h2>
+
       <p>
         I'm here to help you with homework, questions and studying.
         Ask me anything and we'll figure it out together!
@@ -212,6 +225,7 @@
       </div>
 
       <div class="input-row">
+
         <input
           type="text"
           id="questionInput"
@@ -222,14 +236,27 @@
         <button id="sendButton">
           Send
         </button>
+
       </div>
 
       <label class="upload">
         📷 Upload Homework Photo
-        <input type="file" id="fileInput" accept="image/*">
+        <input
+          type="file"
+          id="fileInput"
+          accept="image/*"
+        >
       </label>
 
       <div id="fileName"></div>
+
+      <button
+        id="removeImageButton"
+        class="remove-image"
+        type="button"
+      >
+        Remove photo
+      </button>
 
     </section>
 
@@ -241,20 +268,43 @@
 
 
   <script>
+
     let selectedSubject = "";
+    let selectedImageBase64 = "";
     let isAsking = false;
 
-    const questionInput = document.getElementById("questionInput");
-    const sendButton = document.getElementById("sendButton");
-    const answerBox = document.getElementById("answerBox");
-    const fileInput = document.getElementById("fileInput");
-    const fileName = document.getElementById("fileName");
+    const questionInput =
+      document.getElementById("questionInput");
+
+    const sendButton =
+      document.getElementById("sendButton");
+
+    const answerBox =
+      document.getElementById("answerBox");
+
+    const fileInput =
+      document.getElementById("fileInput");
+
+    const fileName =
+      document.getElementById("fileName");
+
+    const removeImageButton =
+      document.getElementById("removeImageButton");
+
+
+    /*
+      SUBJECT BUTTONS
+    */
 
     document.querySelectorAll(".subject").forEach(button => {
+
       button.addEventListener("click", () => {
-        selectedSubject = button.dataset.subject;
+
+        selectedSubject =
+          button.dataset.subject;
 
         questionInput.value = "";
+
         questionInput.placeholder =
           selectedSubject + " question...";
 
@@ -264,88 +314,295 @@
           "Sure! 😊 Ask me your " +
           selectedSubject +
           " question.";
+
       });
+
     });
+
+
+    /*
+      IMAGE SELECTION
+    */
 
     fileInput.addEventListener("change", () => {
-      if (fileInput.files.length > 0) {
-        fileName.textContent =
-          "Selected: " + fileInput.files[0].name;
-      } else {
+
+      const file = fileInput.files[0];
+
+      if (!file) {
+
+        selectedImageBase64 = "";
         fileName.textContent = "";
+        removeImageButton.style.display = "none";
+
+        return;
       }
+
+
+      /*
+        Check that it is actually an image
+      */
+
+      if (!file.type.startsWith("image/")) {
+
+        selectedImageBase64 = "";
+        fileInput.value = "";
+
+        fileName.textContent =
+          "Please select an image file.";
+
+        removeImageButton.style.display = "none";
+
+        return;
+      }
+
+
+      /*
+        Show selected filename
+      */
+
+      fileName.textContent =
+        "Selected: " + file.name;
+
+
+      /*
+        Convert image to Base64
+        so it can be sent to the Worker
+      */
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+
+        selectedImageBase64 =
+          reader.result;
+
+        removeImageButton.style.display =
+          "block";
+
+      };
+
+      reader.onerror = () => {
+
+        selectedImageBase64 = "";
+
+        fileName.textContent =
+          "Could not read the image.";
+
+        removeImageButton.style.display =
+          "none";
+
+      };
+
+      reader.readAsDataURL(file);
+
     });
 
+
+    /*
+      REMOVE IMAGE
+    */
+
+    removeImageButton.addEventListener("click", () => {
+
+      fileInput.value = "";
+
+      selectedImageBase64 = "";
+
+      fileName.textContent = "";
+
+      removeImageButton.style.display =
+        "none";
+
+    });
+
+
+    /*
+      SEND BUTTON
+    */
+
     sendButton.addEventListener("click", () => {
+
       if (!isAsking) {
         askSabi();
       }
+
     });
 
+
+    /*
+      ENTER KEY
+    */
+
     questionInput.addEventListener("keydown", event => {
+
       if (event.key === "Enter") {
+
         event.preventDefault();
 
         if (!isAsking) {
           askSabi();
         }
+
       }
+
     });
 
-    async function askSabi() {
-      const question = questionInput.value.trim();
 
-      if (!question || isAsking) {
+    /*
+      MAIN SABI FUNCTION
+    */
+
+    async function askSabi() {
+
+      const question =
+        questionInput.value.trim();
+
+
+      /*
+        Allow image-only questions.
+        Text is not required if a photo exists.
+      */
+
+      if (
+        (!question && !selectedImageBase64) ||
+        isAsking
+      ) {
+
+        if (!question && !selectedImageBase64) {
+
+          answerBox.textContent =
+            "Please type a question or upload a homework photo.";
+
+        }
+
         return;
       }
 
-      isAsking = true;
-      sendButton.disabled = true;
-      sendButton.textContent = "Thinking...";
 
-      answerBox.textContent = "Let me think 😊";
+      isAsking = true;
+
+      sendButton.disabled = true;
+
+      sendButton.textContent =
+        "Thinking...";
+
+
+      answerBox.textContent =
+        selectedImageBase64
+          ? "I'm looking at your homework photo... 📷"
+          : "Let me think 😊";
+
+
+      /*
+        Build the text question
+      */
 
       let finalQuestion = question;
 
-      if (selectedSubject) {
+
+      if (selectedSubject && question) {
+
         finalQuestion =
           "Subject: " +
           selectedSubject +
           "\n\nStudent question: " +
           question;
+
+      } else if (selectedSubject && !question) {
+
+        finalQuestion =
+          "Subject: " +
+          selectedSubject +
+          "\n\nPlease solve the homework question shown in the image.";
+
+      } else if (!question && selectedImageBase64) {
+
+        finalQuestion =
+          "Please read the homework question in the image and solve it. Explain the answer clearly for a student.";
+
       }
+
+
+      /*
+        Send BOTH:
+        - question
+        - image
+      */
 
       try {
-        const response = await fetch("/api/ask", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            question: finalQuestion
-          })
-        });
 
-        const data = await response.json();
+        const response =
+          await fetch("/api/ask", {
+
+            method: "POST",
+
+            headers: {
+              "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+
+              question: finalQuestion,
+
+              image: selectedImageBase64 || ""
+
+            })
+
+          });
+
+
+        /*
+          Read server response
+        */
+
+        const data =
+          await response.json();
+
 
         if (data.answer) {
-          answerBox.textContent = data.answer;
+
+          answerBox.textContent =
+            data.answer;
+
         } else if (data.error) {
-          answerBox.textContent = data.error;
+
+          answerBox.textContent =
+            data.error;
+
         } else {
+
           answerBox.textContent =
             "Sorry, I couldn't answer that. Please try again 😊";
+
         }
 
+
       } catch (error) {
+
+        console.error(
+          "SABI request error:",
+          error
+        );
+
         answerBox.textContent =
           "Sorry, something went wrong. Please try again 😊";
+
       }
 
+
+      /*
+        Reset button
+      */
+
       isAsking = false;
+
       sendButton.disabled = false;
-      sendButton.textContent = "Send";
+
+      sendButton.textContent =
+        "Send";
+
     }
+
   </script>
 
 </body>
