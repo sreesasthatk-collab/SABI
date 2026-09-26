@@ -130,41 +130,6 @@
       cursor: not-allowed;
     }
 
-    .upload {
-      display: block;
-      margin-top: 15px;
-      padding: 14px;
-      border: 2px dashed #d5d1f5;
-      border-radius: 12px;
-      text-align: center;
-      color: #5b4bdb;
-      cursor: pointer;
-      background: #faf9ff;
-    }
-
-    #fileInput {
-      display: none;
-    }
-
-    #fileName {
-      margin-top: 8px;
-      font-size: 13px;
-      color: #666;
-      text-align: center;
-    }
-
-    .remove-image {
-      display: none;
-      margin: 8px auto 0;
-      border: none;
-      background: #f1f1f1;
-      color: #555;
-      padding: 7px 12px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 12px;
-    }
-
     footer {
       text-align: center;
       padding: 25px;
@@ -239,25 +204,6 @@
 
       </div>
 
-      <label class="upload">
-        📷 Upload Homework Photo
-        <input
-          type="file"
-          id="fileInput"
-          accept="image/*"
-        >
-      </label>
-
-      <div id="fileName"></div>
-
-      <button
-        id="removeImageButton"
-        class="remove-image"
-        type="button"
-      >
-        Remove photo
-      </button>
-
     </section>
 
   </main>
@@ -270,7 +216,6 @@
   <script>
 
     let selectedSubject = "";
-    let selectedImageBase64 = "";
     let isAsking = false;
 
     const questionInput =
@@ -281,15 +226,6 @@
 
     const answerBox =
       document.getElementById("answerBox");
-
-    const fileInput =
-      document.getElementById("fileInput");
-
-    const fileName =
-      document.getElementById("fileName");
-
-    const removeImageButton =
-      document.getElementById("removeImageButton");
 
 
     /*
@@ -316,102 +252,6 @@
           " question.";
 
       });
-
-    });
-
-
-    /*
-      IMAGE SELECTION
-    */
-
-    fileInput.addEventListener("change", () => {
-
-      const file = fileInput.files[0];
-
-      if (!file) {
-
-        selectedImageBase64 = "";
-        fileName.textContent = "";
-        removeImageButton.style.display = "none";
-
-        return;
-      }
-
-
-      /*
-        Check that it is actually an image
-      */
-
-      if (!file.type.startsWith("image/")) {
-
-        selectedImageBase64 = "";
-        fileInput.value = "";
-
-        fileName.textContent =
-          "Please select an image file.";
-
-        removeImageButton.style.display = "none";
-
-        return;
-      }
-
-
-      /*
-        Show selected filename
-      */
-
-      fileName.textContent =
-        "Selected: " + file.name;
-
-
-      /*
-        Convert image to Base64
-        so it can be sent to the Worker
-      */
-
-      const reader = new FileReader();
-
-      reader.onload = () => {
-
-        selectedImageBase64 =
-          reader.result;
-
-        removeImageButton.style.display =
-          "block";
-
-      };
-
-      reader.onerror = () => {
-
-        selectedImageBase64 = "";
-
-        fileName.textContent =
-          "Could not read the image.";
-
-        removeImageButton.style.display =
-          "none";
-
-      };
-
-      reader.readAsDataURL(file);
-
-    });
-
-
-    /*
-      REMOVE IMAGE
-    */
-
-    removeImageButton.addEventListener("click", () => {
-
-      fileInput.value = "";
-
-      selectedImageBase64 = "";
-
-      fileName.textContent = "";
-
-      removeImageButton.style.display =
-        "none";
 
     });
 
@@ -458,20 +298,12 @@
         questionInput.value.trim();
 
 
-      /*
-        Allow image-only questions.
-        Text is not required if a photo exists.
-      */
+      if (!question || isAsking) {
 
-      if (
-        (!question && !selectedImageBase64) ||
-        isAsking
-      ) {
-
-        if (!question && !selectedImageBase64) {
+        if (!question) {
 
           answerBox.textContent =
-            "Please type a question or upload a homework photo.";
+            "Please type a question.";
 
         }
 
@@ -488,9 +320,7 @@
 
 
       answerBox.textContent =
-        selectedImageBase64
-          ? "I'm looking at your homework photo... 📷"
-          : "Let me think 😊";
+        "Let me think 😊";
 
 
       /*
@@ -500,7 +330,7 @@
       let finalQuestion = question;
 
 
-      if (selectedSubject && question) {
+      if (selectedSubject) {
 
         finalQuestion =
           "Subject: " +
@@ -508,25 +338,11 @@
           "\n\nStudent question: " +
           question;
 
-      } else if (selectedSubject && !question) {
-
-        finalQuestion =
-          "Subject: " +
-          selectedSubject +
-          "\n\nPlease solve the homework question shown in the image.";
-
-      } else if (!question && selectedImageBase64) {
-
-        finalQuestion =
-          "Please read the homework question in the image and solve it. Explain the answer clearly for a student.";
-
       }
 
 
       /*
-        Send BOTH:
-        - question
-        - image
+        Send text question only
       */
 
       try {
@@ -542,18 +358,12 @@
 
             body: JSON.stringify({
 
-              question: finalQuestion,
-
-              image: selectedImageBase64 || ""
+              question: finalQuestion
 
             })
 
           });
 
-
-        /*
-          Read server response
-        */
 
         const data =
           await response.json();
@@ -589,10 +399,6 @@
 
       }
 
-
-      /*
-        Reset button
-      */
 
       isAsking = false;
 
